@@ -1,0 +1,223 @@
+// ==================== PART A (Student Aggregate) ====================
+
+use Darshan
+db.createCollection("Student")
+
+db.Student.insertMany([
+ {ROLLNO:101,SNAME:"Vina",DEPARTMENT:"CE",FEES:15000,SEM:3,GENDER:"Female",CITY:"Rajkot"},
+ {ROLLNO:102,SNAME:"Krisha",DEPARTMENT:"EC",FEES:8000,SEM:5,GENDER:"Female",CITY:"Ahmedabad"},
+ {ROLLNO:103,SNAME:"Priti",DEPARTMENT:"Civil",FEES:12000,SEM:7,GENDER:"Female",CITY:"Baroda"},
+ {ROLLNO:104,SNAME:"Mitul",DEPARTMENT:"CE",FEES:15000,SEM:3,GENDER:"Male",CITY:"Rajkot"},
+ {ROLLNO:105,SNAME:"Keshav",DEPARTMENT:"CE",FEES:15000,SEM:3,GENDER:"Male",CITY:"Jamnagar"},
+ {ROLLNO:106,SNAME:"Zarna",DEPARTMENT:"Civil",FEES:12000,SEM:5,GENDER:"Female",CITY:"Ahmedabad"},
+ {ROLLNO:107,SNAME:"Nima",DEPARTMENT:"EE",FEES:9000,SEM:5,GENDER:"Female",CITY:"Rajkot"},
+ {ROLLNO:108,SNAME:"Dhruv",DEPARTMENT:"Mechanical",FEES:10000,SEM:5,GENDER:"Male",CITY:"Rajkot"},
+ {ROLLNO:109,SNAME:"Krish",DEPARTMENT:"Mechanical",FEES:10000,SEM:7,GENDER:"Male",CITY:"Baroda"},
+ {ROLLNO:110,SNAME:"Zeel",DEPARTMENT:"EE",FEES:9000,SEM:3,GENDER:"Female",CITY:"Jamnagar"}
+])
+
+// 1. Distinct cities
+db.Student.aggregate([{ $group:{ _id:"$CITY"} }])
+
+// 2. City-wise student count
+db.Student.aggregate([{ $group:{ _id:"$CITY", count:{ $sum:1 }}}])
+
+// 3. Sum of fees
+db.Student.aggregate([{ $group:{ _id:null, totalFees:{ $sum:"$FEES" }}}])
+
+// 4. Average fees
+db.Student.aggregate([{ $group:{ _id:null, avgFees:{ $avg:"$FEES" }}}])
+
+// 5. Max & Min fees
+db.Student.aggregate([{ $group:{ _id:null, max:{ $max:"$FEES"}, min:{ $min:"$FEES"}}}])
+
+// 6. City-wise total fees
+db.Student.aggregate([{ $group:{ _id:"$CITY", total:{ $sum:"$FEES"}}}])
+
+// 7. Gender-wise max fees
+db.Student.aggregate([{ $group:{ _id:"$GENDER", max:{ $max:"$FEES"}}}])
+
+// 8. City-wise max & min fees
+db.Student.aggregate([{ $group:{ _id:"$CITY", max:{ $max:"$FEES"}, min:{ $min:"$FEES"}}}])
+
+// 9. Count students in Baroda
+db.Student.aggregate([
+ {$match:{CITY:"Baroda"}},
+ {$count:"BarodaCount"}
+])
+
+// 10. Avg fees of Rajkot
+db.Student.aggregate([
+ {$match:{CITY:"Rajkot"}},
+ {$group:{_id:null, avg:{ $avg:"$FEES"}}}
+])
+
+// 11. Male & Female count per department
+db.Student.aggregate([
+ {$group:{_id:{Dept:"$DEPARTMENT",Gender:"$GENDER"}, count:{ $sum:1}}}
+])
+
+// 12. Total fees per department
+db.Student.aggregate([{ $group:{ _id:"$DEPARTMENT", total:{ $sum:"$FEES"}}}])
+
+// 13. Min fees by gender in each city
+db.Student.aggregate([
+ {$group:{_id:{City:"$CITY",Gender:"$GENDER"}, min:{ $min:"$FEES"}}}
+])
+
+// 14. Top 5 by fees
+db.Student.aggregate([
+ {$sort:{FEES:-1}},
+ {$limit:5}
+])
+
+// 15. Avg fees >12000 by city
+db.Student.aggregate([
+ {$group:{_id:"$CITY", avg:{ $avg:"$FEES"}}},
+ {$match:{avg:{ $gt:12000}}}
+])
+
+// 16. CE or Mechanical total fees
+db.Student.aggregate([
+ {$match:{DEPARTMENT:{ $in:["CE","Mechanical"]}}},
+ {$group:{_id:null, total:{ $sum:"$FEES"}}}
+])
+
+// 17. City+Dept+Gender max/min/avg
+db.Student.aggregate([
+ {$group:{
+  _id:{City:"$CITY",Dept:"$DEPARTMENT",Gender:"$GENDER"},
+  max:{ $max:"$FEES"},
+  min:{ $min:"$FEES"},
+  avg:{ $avg:"$FEES"}
+ }}
+])
+
+// 18. Rajkot → Avg fees per dept
+db.Student.aggregate([
+ {$match:{CITY:"Rajkot"}},
+ {$group:{_id:"$DEPARTMENT", avg:{ $avg:"$FEES"}}}
+])
+
+// 19. Group by sem → total & avg
+db.Student.aggregate([
+ {$group:{_id:"$SEM", total:{ $sum:"$FEES"}, avg:{ $avg:"$FEES"}}},
+ {$sort:{total:-1}}
+])
+
+// 20. Top 3 cities by total fees
+db.Student.aggregate([
+ {$group:{_id:"$CITY", total:{ $sum:"$FEES"}}},
+ {$sort:{total:-1}},
+ {$limit:3}
+])
+
+print("PART A Aggregate Completed")
+
+// ==================== PART B (Stock Aggregate) ====================
+
+db.createCollection("Stock")
+
+db.Stock.insertMany([
+ {_id:1,company:"Company-A",sector:"Technology",eps:5.2,pe:15.3,roe:12.8,sales:500000,profit:40000},
+ {_id:7,company:"Company-G",sector:"Retail",eps:4.3,pe:22.1,roe:14.2,sales:600000,profit:45000},
+ {_id:8,company:"Company-H",sector:"Energy",eps:6.5,pe:10.5,roe:16.4,sales:550000,profit:50000},
+ {_id:9,company:"Company-I",sector:"Consumer Goods",eps:2.9,pe:25.3,roe:7.8,sales:350000,profit:20000}
+])
+
+// 3. Total sales
+db.Stock.aggregate([{ $group:{_id:null,total:{ $sum:"$sales"}}}])
+
+// 4. Avg profit per sector
+db.Stock.aggregate([{ $group:{_id:"$sector",avg:{ $avg:"$profit"}}}])
+
+// 5. Count per sector
+db.Stock.aggregate([{ $group:{_id:"$sector",count:{ $sum:1}}}])
+
+// 6. Highest PE
+db.Stock.aggregate([{ $sort:{pe:-1}},{$limit:1}])
+
+// 7. PE > 20
+db.Stock.aggregate([{ $match:{pe:{ $gt:20}}}])
+
+// 8. Profit where sales >250000
+db.Stock.aggregate([
+ {$match:{sales:{ $gt:250000}}},
+ {$group:{_id:null,total:{ $sum:"$profit"}}}
+])
+
+// 9. Project company & profit
+db.Stock.aggregate([{ $project:{company:1,profit:1,_id:0}}])
+
+// 10. EPS > avg EPS
+db.Stock.aggregate([
+ {$group:{_id:null,avgEPS:{ $avg:"$eps"}}}
+])
+
+print("PART B Aggregate Completed")
+
+// ==================== PART C ====================
+
+// 1. Profit > 30000 count
+db.Stock.aggregate([
+ {$match:{profit:{ $gt:30000}}},
+ {$count:"count"}
+])
+
+// 2. Profit by sector sorted
+db.Stock.aggregate([
+ {$group:{_id:"$sector",total:{ $sum:"$profit"}}},
+ {$sort:{total:-1}}
+])
+
+// 3. Top 3 sales
+db.Stock.aggregate([
+ {$sort:{sales:-1}},
+ {$limit:3}
+])
+
+// 4. Avg PE by sector
+db.Stock.aggregate([
+ {$group:{_id:"$sector",avg:{ $avg:"$pe"}}}
+])
+
+// 5. Sum sales & profit per company
+db.Stock.aggregate([
+ {$project:{company:1,total:{ $add:["$sales","$profit"]}}}
+])
+
+// 6. Sales <400000 sorted desc
+db.Stock.aggregate([
+ {$match:{sales:{ $lt:400000}}},
+ {$sort:{sales:-1}}
+])
+
+// 7. Count per sector
+db.Stock.aggregate([{ $group:{_id:"$sector",count:{ $sum:1}}}])
+
+// 8. Avg ROE sales >200000
+db.Stock.aggregate([
+ {$match:{sales:{ $gt:200000}}},
+ {$group:{_id:null,avg:{ $avg:"$roe"}}}
+])
+
+// 9. Max profit per sector
+db.Stock.aggregate([
+ {$group:{_id:"$sector",max:{ $max:"$profit"}}}
+])
+
+// 10. Total sales & count per sector
+db.Stock.aggregate([
+ {$group:{_id:"$sector",total:{ $sum:"$sales"},count:{ $sum:1}}}
+])
+
+// 11. Project where profit >20000
+db.Stock.aggregate([
+ {$match:{profit:{ $gt:20000}}},
+ {$project:{company:1,profit:1,_id:0}}
+])
+
+// 12. Lowest ROE sorted asc
+db.Stock.aggregate([{ $sort:{roe:1}}])
+
+print("ALL AGGREGATE OPERATIONS COMPLETED")
