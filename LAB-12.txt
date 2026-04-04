@@ -1,0 +1,167 @@
+// ==================== PART A (Employee Collection) ====================
+
+use Darshan
+print("Using Darshan database")
+
+db.createCollection("Employee")
+print("Employee collection created")
+
+// Insert Employee documents
+db.Employee.insertMany([
+ {EID:1,ENAME:"Nick",GENDER:"Male",JOININGDATE:"01-JAN-13",SALARY:4000,CITY:"London"},
+ {EID:2,ENAME:"Julian",GENDER:"Female",JOININGDATE:"01-OCT-14",SALARY:3000,CITY:"New York"},
+ {EID:3,ENAME:"Roy",GENDER:"Male",JOININGDATE:"01-JUN-16",SALARY:3500,CITY:"London"},
+ {EID:4,ENAME:"Tom",GENDER:"Male",JOININGDATE:null,SALARY:4500,CITY:"London"},
+ {EID:5,ENAME:"Jerry",GENDER:"Male",JOININGDATE:"01-FEB-13",SALARY:2800,CITY:"Sydney"},
+ {EID:6,ENAME:"Philip",GENDER:"Male",JOININGDATE:"01-JAN-15",SALARY:7000,CITY:"New York"},
+ {EID:7,ENAME:"Sara",GENDER:"Female",JOININGDATE:"01-AUG-17",SALARY:4800,CITY:"Sydney"},
+ {EID:8,ENAME:"Emily",GENDER:"Female",JOININGDATE:"01-JAN-15",SALARY:5500,CITY:"New York"},
+ {EID:9,ENAME:"Michael",GENDER:"Male",JOININGDATE:null,SALARY:6500,CITY:"London"},
+ {EID:10,ENAME:"John",GENDER:"Male",JOININGDATE:"01-JAN-15",SALARY:8800,CITY:"London"}
+])
+
+// REGEX Queries
+
+// 1. Name starts with E
+db.Employee.find({ENAME:/^E/})
+
+// 2. Name ends with n
+db.Employee.find({ENAME:/n$/})
+
+// 3. Name starts with S or M
+db.Employee.find({ENAME:/^[SM]/})
+
+// 4. City starts A to M
+db.Employee.find({CITY:/^[A-M]/})
+
+// 5. City ends with 'ney'
+db.Employee.find({CITY:/ney$/})
+
+// 6. Name contains n (case-insensitive)
+db.Employee.find({ENAME:/n/i})
+
+// 7. Name starts with E and 5 characters
+db.Employee.find({ENAME:/^E....$/})
+
+// 8. Name starts S ends a
+db.Employee.find({ENAME:/^S.*a$/})
+
+// 9. Name starts with Phi
+db.Employee.find({ENAME:/^Phi/},{EID:1,ENAME:1,CITY:1,SALARY:1,_id:0})
+
+// 10. City contains 'dne'
+db.Employee.find({CITY:/dne/i},{ENAME:1,JOININGDATE:1,CITY:1,_id:0})
+
+// 11. Not London or Sydney
+db.Employee.find({CITY:{$nin:["London","Sydney"]}})
+
+// 12–28 Similar pattern queries
+db.Employee.find({ENAME:/^J/})
+db.Employee.find({ENAME:/y$/})
+db.Employee.find({ENAME:/a/})
+db.Employee.find({ENAME:/[ae]/i})
+db.Employee.find({ENAME:/^J.*n$/})
+db.Employee.find({CITY:/^New/})
+db.Employee.find({CITY:/^[^L]/})
+db.Employee.find({CITY:/York/})
+db.Employee.find({ENAME:/[aeiou]{2}/i})
+db.Employee.find({ENAME:/^.{3,}$/})
+db.Employee.find({ENAME:/^.{4}$/})
+db.Employee.find({ENAME:/^[SM]/})
+db.Employee.find({ENAME:/il/i})
+db.Employee.find({ENAME:/^[^a]*$/i})
+db.Employee.find({ENAME:/\d/})
+db.Employee.find({ENAME:/^[^aeiou]*[aeiou][^aeiou]*$/i})
+db.Employee.find({ENAME:/^[A-Z][a-z]/})
+
+print("PART A completed")
+
+// ==================== PART B (Student Collection) ====================
+
+db.createCollection("Student")
+print("Student collection created")
+
+db.Student.insertMany([
+ {ROLLNO:101,SNAME:"Vina",DEPARTMENT:"CE",FEES:15000,SEM:3,GENDER:"Female",CITY:"Rajkot"},
+ {ROLLNO:102,SNAME:"Krisha",DEPARTMENT:"EC",FEES:8000,SEM:5,GENDER:"Female",CITY:"Ahmedabad"},
+ {ROLLNO:103,SNAME:"Priti",DEPARTMENT:"Civil",FEES:12000,SEM:7,GENDER:"Female",CITY:"Baroda"},
+ {ROLLNO:104,SNAME:"Mitul",DEPARTMENT:"CE",FEES:15000,SEM:3,GENDER:"Male",CITY:"Rajkot"},
+ {ROLLNO:105,SNAME:"Keshav",DEPARTMENT:"CE",FEES:15000,SEM:3,GENDER:"Male",CITY:"Jamnagar"},
+ {ROLLNO:106,SNAME:"Zarna",DEPARTMENT:"Civil",FEES:12000,SEM:5,GENDER:"Female",CITY:"Ahmedabad"},
+ {ROLLNO:107,SNAME:"Nima",DEPARTMENT:"EE",FEES:9000,SEM:5,GENDER:"Female",CITY:"Rajkot"},
+ {ROLLNO:108,SNAME:"Dhruv",DEPARTMENT:"Mechanical",FEES:10000,SEM:5,GENDER:"Male",CITY:"Rajkot"},
+ {ROLLNO:109,SNAME:"Krish",DEPARTMENT:"Mechanical",FEES:10000,SEM:7,GENDER:"Male",CITY:"Baroda"},
+ {ROLLNO:110,SNAME:"Zeel",DEPARTMENT:"EE",FEES:9000,SEM:3,GENDER:"Female",CITY:"Jamnagar"}
+])
+
+// Sample regex queries
+db.Student.find({SNAME:/^K/})
+db.Student.find({SNAME:/^[ZD]/})
+db.Student.find({CITY:/^[A-R]/})
+db.Student.find({SNAME:/^P.*i$/})
+db.Student.find({DEPARTMENT:/^C/})
+db.Student.find({CITY:/med/i},{SNAME:1,SEM:1,FEES:1,DEPARTMENT:1,_id:0})
+db.Student.find({CITY:{$nin:["Rajkot","Baroda"]}})
+db.Student.find({SNAME:/^K./})
+db.Student.find({SNAME:/a$/})
+db.Student.find({SNAME:/ri/i})
+db.Student.find({SNAME:/^[AEIOU]/i})
+db.Student.find({CITY:/pur$|bad$/})
+db.Student.find({FEES:/^1/})
+db.Student.find({SNAME:/^[KV]/})
+db.Student.find({CITY:/^.{5}$/})
+db.Student.find({SNAME:/^[^e]*$/i})
+db.Student.find({CITY:/^Ra.*ot$/})
+db.Student.find({SNAME:/^[^aeiou]*[aeiou][^aeiou]*$/i})
+db.Student.find({SNAME:/^(.).*\1$/})
+db.Student.find({DEPARTMENT:/^[CE]/})
+db.Student.find({SNAME:/^.{5}$/})
+db.Student.find({GENDER:"Female",CITY:/^A/})
+
+print("PART B completed")
+
+// ==================== PART C (Company Collection) ====================
+
+db.createCollection("Company")
+print("Company collection created")
+
+db.Company.insertMany([
+ {CID:1,CNAME:"TechNova",EMAIL:"info@technova.com",INDUSTRY:"IT",CITY:"Bangalore",EMPLOYEES:250},
+ {CID:2,CNAME:"GreenWorld",EMAIL:"support@greenw.com",INDUSTRY:"Agriculture",CITY:"Ahmedabad",EMPLOYEES:120},
+ {CID:3,CNAME:"SkyHigh Ltd",EMAIL:"contact@skyhigh.in",INDUSTRY:"Aviation",CITY:"Mumbai",EMPLOYEES:300},
+ {CID:4,CNAME:"UrbanBuild",EMAIL:"info@urbanbuild.org",INDUSTRY:"Construction",CITY:"Surat",EMPLOYEES:180},
+ {CID:5,CNAME:"MediCore",EMAIL:"hello@medicore.net",INDUSTRY:"Healthcare",CITY:"Pune",EMPLOYEES:90},
+ {CID:6,CNAME:"FinEdge",EMAIL:"info@finedge.co",INDUSTRY:"Finance",CITY:"Kolkata",EMPLOYEES:200},
+ {CID:7,CNAME:"AutoSphere",EMAIL:"sales@autos.com",INDUSTRY:"Automotive",CITY:"Chennai",EMPLOYEES:400},
+ {CID:8,CNAME:"EduQuest",EMAIL:"info@eduquest.edu",INDUSTRY:"Education",CITY:"Rajkot",EMPLOYEES:75},
+ {CID:9,CNAME:"FoodiesHub",EMAIL:"contact@foodies.org",INDUSTRY:"Food",CITY:"Baroda",EMPLOYEES:60},
+ {CID:10,CNAME:"BioPure",EMAIL:"info@biopure.bio",INDUSTRY:"Pharma",CITY:"Hyderabad",EMPLOYEES:150}
+])
+
+// Sample regex queries
+db.Company.find({CNAME:/^[BF]/})
+db.Company.find({CITY:/pur$/})
+db.Company.find({CNAME:/Core/})
+db.Company.find({EMAIL:/^info/})
+db.Company.find({INDUSTRY:/^[A-Z][a-z]{4}/})
+db.Company.find({CNAME:/[A-Z]$/})
+db.Company.find({CITY:/^[A-K]/})
+db.Company.find({INDUSTRY:/^.{9,}$/})
+db.Company.find({EMAIL:/\d/})
+db.Company.find({CNAME:/^[AEIOU].*[AEIOU]$/i})
+db.Company.find({CITY:/(.)\1/})
+db.Company.find({EMAIL:/^[a-z]{2}\d/i})
+db.Company.find({EMAIL:/_/})
+db.Company.find({EMAIL:/@(g|h)/})
+db.Company.find({CNAME:/(ana|ele)/})
+db.Company.find({CNAME:/([aeiou].*){3}/i})
+db.Company.find({EMAIL:/@out.*\.com$/})
+db.Company.find({INDUSTRY:/^[^aeiou]*$/i})
+db.Company.find({CNAME:/[^aeiou]{2}/i})
+db.Company.find({CNAME:/^([aeiou][^aeiou]){2,}/i})
+db.Company.find({CITY:/^(.)\1/})
+
+print("PART C completed")
+
+// ==================== END ====================
+print("All regex lab operations completed successfully")
