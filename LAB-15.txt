@@ -1,0 +1,190 @@
+// ==================== PART A ====================
+
+// Use existing Stock collection
+use Darshan
+
+// 1. Create index on company
+db.Stock.createIndex({company:1})
+
+// 2. Compound index on sector + sales
+db.Stock.createIndex({sector:1,sales:1})
+
+// 3. List all indexes
+db.Stock.getIndexes()
+
+// 4. Drop index on company
+db.Stock.dropIndex({company:1})
+
+// 5. Cursor iterate and print documents
+var cursor = db.Stock.find()
+while(cursor.hasNext()){
+   printjson(cursor.next())
+}
+
+// 6. Limit first 3 documents
+db.Stock.find().limit(3)
+
+// 7. Sort by sales (descending)
+db.Stock.find().sort({sales:-1})
+
+// 8. Skip first 2 documents
+db.Stock.find().skip(2)
+
+// 9. Convert cursor to array
+db.Stock.find().toArray()
+
+// 10. Create Companies with schema validation
+db.createCollection("Companies",{
+ validator:{
+  $jsonSchema:{
+   bsonType:"object",
+   required:["company","sector"],
+   properties:{
+    company:{bsonType:"string"},
+    sector:{bsonType:"string"}
+   }
+  }
+ }
+})
+
+print("PART A completed")
+
+// ==================== PART B ====================
+
+// 1. Scripts collection with required numeric fields
+db.createCollection("Scripts",{
+ validator:{
+  $jsonSchema:{
+   bsonType:"object",
+   required:["eps","pe","roe"],
+   properties:{
+    eps:{bsonType:"number"},
+    pe:{bsonType:"number"},
+    roe:{bsonType:"number"}
+   }
+  }
+ }
+})
+
+// 2. Products collection (Embedded + Multivalued)
+db.createCollection("Products")
+
+db.Products.insertOne({
+ name:"Smartphone",
+ price:25000,
+
+ // Embedded document
+ manufacturer:{
+   name:"Samsung",
+   country:"South Korea",
+   establishedYear:1938
+ },
+
+ // Multivalued field (Array)
+ categories:["Electronics","Mobile","Smart Devices"]
+})
+
+db.createCollection("Products", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["name", "manufacturer", "categories"],
+      properties: {
+        name: { bsonType: "string" },
+        price: { bsonType: "number" },
+
+        manufacturer: {
+          bsonType: "object",
+          required: ["name", "country", "establishedYear"],
+          properties: {
+            name: { bsonType: "string" },
+            country: { bsonType: "string" },
+            establishedYear: { bsonType: "number" }
+          }
+        },
+
+        categories: {
+          bsonType: "array",
+          items: { bsonType: "string" }
+        }
+      }
+    }
+  }
+})
+
+print("PART B completed")
+
+// ==================== PART C ====================
+
+// 1. financial_Reports with validation
+db.createCollection("financial_Reports",{
+ validator:{
+  $jsonSchema:{
+   bsonType:"object",
+   required:["revenue"],
+   properties:{
+    revenue:{bsonType:"number",minimum:0},
+    expenses:{bsonType:"number"},
+    netIncome:{bsonType:"number"}
+   }
+  }
+ }
+})
+
+// 2. Student (Embedded + Multivalued)
+db.createCollection("Student")
+
+db.Student.insertOne({
+ name:{
+   first:"Amit",
+   last:"Shah"
+ },
+ address:{
+   city:"Ahmedabad",
+   state:"Gujarat"
+ },
+ mobilenumber:["9876543210","9123456780"],
+ emailaddress:["amit@gmail.com","amit@company.com"]
+})
+
+
+db.createCollection("Student", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["name", "address", "mobilenumber", "emailaddress"],
+      properties: {
+        
+        name: {
+          bsonType: "object",
+          required: ["first", "last"],
+          properties: {
+            first: { bsonType: "string" },
+            last: { bsonType: "string" }
+          }
+        },
+
+        address: {
+          bsonType: "object",
+          required: ["city", "state"],
+          properties: {
+            city: { bsonType: "string" },
+            state: { bsonType: "string" }
+          }
+        },
+
+        mobilenumber: {
+          bsonType: "array",
+          items: { bsonType: "string" }
+        },
+
+        emailaddress: {
+          bsonType: "array",
+          items: { bsonType: "string" }
+        }
+      }
+    }
+  }
+})
+
+print("ALL OPERATIONS COMPLETED")
