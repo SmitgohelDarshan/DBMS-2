@@ -1,0 +1,192 @@
+// ==================== PART A (Lookup + Aggregate) ====================
+
+use Darshan
+print("Using Darshan database")
+
+// Create collections
+db.createCollection("Student")
+db.createCollection("Department")
+db.createCollection("Fees")
+
+// Insert Student
+db.Student.insertMany([
+ {_id:1,name:"Amit",dept_id:101,marks:82},
+ {_id:2,name:"Rina",dept_id:102,marks:91},
+ {_id:3,name:"Karan",dept_id:101,marks:76},
+ {_id:4,name:"Meera",dept_id:103,marks:88},
+ {_id:5,name:"Iqbal",dept_id:102,marks:67}
+])
+
+// Insert Department
+db.Department.insertMany([
+ {_id:101,dept_name:"Computer Science"},
+ {_id:102,dept_name:"Electronics"},
+ {_id:103,dept_name:"Mechanical"}
+])
+
+// Insert Fees
+db.Fees.insertMany([
+ {_id:1,student_id:1,amount:25000,status:"Paid"},
+ {_id:2,student_id:2,amount:30000,status:"Unpaid"},
+ {_id:3,student_id:3,amount:25000,status:"Paid"},
+ {_id:4,student_id:4,amount:35000,status:"Paid"}
+])
+
+// 1. Student + department (lookup)
+db.Student.aggregate([
+ {$lookup:{from:"Department",localField:"dept_id",foreignField:"_id",as:"dept"}}
+])
+
+// 2. Name + department name
+db.Student.aggregate([
+ {$lookup:{from:"Department",localField:"dept_id",foreignField:"_id",as:"dept"}},
+ {$unwind:"$dept"},
+ {$project:{_id:0,name:1,dept_name:"$dept.dept_name"}}
+])
+
+// 3. Student + fee info
+db.Student.aggregate([
+ {$lookup:{from:"Fees",localField:"_id",foreignField:"student_id",as:"fees"}}
+])
+
+// 4. Students with unpaid fees
+db.Student.aggregate([
+ {$lookup:{from:"Fees",localField:"_id",foreignField:"student_id",as:"fees"}},
+ {$unwind:"$fees"},
+ {$match:{"fees.status":"Unpaid"}}
+])
+
+// 5. Student + dept + fees
+db.Student.aggregate([
+ {$lookup:{from:"Department",localField:"dept_id",foreignField:"_id",as:"dept"}},
+ {$lookup:{from:"Fees",localField:"_id",foreignField:"student_id",as:"fees"}}
+])
+
+// 6. Students with NO department
+db.Student.aggregate([
+ {$lookup:{from:"Department",localField:"dept_id",foreignField:"_id",as:"dept"}},
+ {$match:{dept:{$size:0}}}
+])
+
+// 7. Students in Computer Science
+db.Student.aggregate([
+ {$lookup:{from:"Department",localField:"dept_id",foreignField:"_id",as:"dept"}},
+ {$unwind:"$dept"},
+ {$match:{"dept.dept_name":"Computer Science"}}
+])
+
+// 8. Sort by marks desc after join
+db.Student.aggregate([
+ {$lookup:{from:"Department",localField:"dept_id",foreignField:"_id",as:"dept"}},
+ {$sort:{marks:-1}}
+])
+
+// 9. Count students per department
+db.Student.aggregate([
+ {$group:{_id:"$dept_id",count:{$sum:1}}}
+])
+
+// 10. Students marks > 80 with dept
+db.Student.aggregate([
+ {$lookup:{from:"Department",localField:"dept_id",foreignField:"_id",as:"dept"}},
+ {$match:{marks:{$gt:80}}}
+])
+
+// 11. Max marks per department
+db.Student.aggregate([
+ {$group:{_id:"$dept_id",maxMarks:{$max:"$marks"}}}
+])
+
+// 12. Students with Paid fees
+db.Student.aggregate([
+ {$lookup:{from:"Fees",localField:"_id",foreignField:"student_id",as:"fees"}},
+ {$unwind:"$fees"},
+ {$match:{"fees.status":"Paid"}}
+])
+
+// 13. Total fee per student
+db.Student.aggregate([
+ {$lookup:{from:"Fees",localField:"_id",foreignField:"student_id",as:"fees"}},
+ {$unwind:"$fees"},
+ {$group:{_id:"$name",totalFee:{$sum:"$fees.amount"}}}
+])
+
+// 14. Department with students
+db.Department.aggregate([
+ {$lookup:{from:"Student",localField:"_id",foreignField:"dept_id",as:"students"}}
+])
+
+// 15. Departments with NO students
+db.Department.aggregate([
+ {$lookup:{from:"Student",localField:"_id",foreignField:"dept_id",as:"students"}},
+ {$match:{students:{$size:0}}}
+])
+
+print("PART A completed")
+
+// ==================== PART B ====================
+
+// 1. Max marks
+db.Student.aggregate([{ $group:{_id:null,max:{$max:"$marks"}}}])
+
+// 2. Avg marks per department
+db.Student.aggregate([
+ {$group:{_id:"$dept_id",avg:{$avg:"$marks"}}}
+])
+
+// 3. Total fees paid
+db.Fees.aggregate([
+ {$match:{status:"Paid"}},
+ {$group:{_id:null,total:{$sum:"$amount"}}}
+])
+
+// 4. Count marks ≥ 80
+db.Student.aggregate([
+ {$match:{marks:{$gte:80}}},
+ {$count:"count"}
+])
+
+// 5. Min marks per department
+db.Student.aggregate([
+ {$group:{_id:"$dept_id",min:{$min:"$marks"}}}
+])
+
+print("PART B completed")
+
+// ==================== PART C ====================
+
+// 1. Sort by marks desc
+db.Student.aggregate([{ $sort:{marks:-1}}])
+
+// 2. Bucket marks
+db.Student.aggregate([
+ {$bucket:{
+   groupBy:"$marks",
+   boundaries:[0,60,80,100],
+   default:"Other",
+   output:{count:{$sum:1}}
+ }}
+])
+
+// 3. Total marks per department
+db.Student.aggregate([
+ {$group:{_id:"$dept_id",total:{$sum:"$marks"}}}
+])
+
+// 4. Avg fee amount
+db.Fees.aggregate([
+ {$group:{_id:null,avg:{$avg:"$amount"}}}
+])
+
+// 5. Compare student marks with dept avg
+db.Student.aggregate([
+ {$group:{_id:"$dept_id",avgMarks:{$avg:"$marks"},students:{$push:"$$ROOT"}}},
+ {$unwind:"$students"},
+ {$project:{
+   name:"$students.name",
+   marks:"$students.marks",
+   deptAvg:"$avgMarks"
+ }}
+])
+
+print("ALL OPERATIONS COMPLETED")
